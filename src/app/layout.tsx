@@ -4,14 +4,20 @@ import CookieBanner from "@/components/shared/CookieBanner";
 import { ThemeProvider } from "@/lib/context/ThemeContext";
 
 export const metadata: Metadata = {
-  title: "ToDo App - Multi-Mandanten Aufgabenverwaltung",
+  title: "JustToDo - Aufgabenverwaltung",
   description: "Professionelle Multi-Mandanten ToDo-Verwaltung mit Kollaboration",
   manifest: "/manifest.json",
-  themeColor: "#14B8A6",
+  themeColor: "#2563eb",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/icons/icon-192x192.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "ToDo App",
+    title: "JustToDo",
   },
 };
 
