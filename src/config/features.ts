@@ -13,7 +13,7 @@ export const FEATURES = {
    * WICHTIG: Wenn auf true gesetzt, sollten zusätzliche Sicherheitsmaßnahmen
    * implementiert werden (E-Mail-Verifizierung, Captcha, etc.)
    */
-  ALLOW_PUBLIC_REGISTRATION: false,
+  ALLOW_PUBLIC_REGISTRATION: true,
 
   /**
    * Erlaubt Benutzern eigene Firmen zu erstellen
