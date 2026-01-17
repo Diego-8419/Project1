@@ -238,7 +238,6 @@ CREATE INDEX IF NOT EXISTS idx_documents_company ON documents(company_id);
 CREATE INDEX IF NOT EXISTS idx_activity_logs_company ON activity_logs(company_id);
 CREATE INDEX IF NOT EXISTS idx_activity_logs_todo ON activity_logs(todo_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
-CREATE INDEX IF NOT EXISTS idx_notifications_unread ON notifications(user_id, is_read) WHERE NOT is_read;
 
 -- =====================================================
 -- 4. RLS POLICIES
