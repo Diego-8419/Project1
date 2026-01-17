@@ -4,6 +4,35 @@
 -- =====================================================
 
 -- =====================================================
+-- 0. FEHLENDE TABELLEN ERSTELLEN (falls nicht vorhanden)
+-- =====================================================
+
+-- UUID Extension aktivieren
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Superuser Permissions Tabelle (oft fehlend)
+CREATE TABLE IF NOT EXISTS superuser_permissions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  superuser_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
+  target_user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Push Subscriptions Tabelle (oft fehlend)
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  endpoint TEXT NOT NULL,
+  p256dh TEXT NOT NULL,
+  auth TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, endpoint)
+);
+
+-- =====================================================
 -- 1. AUTO-CREATE USER PROFILE TRIGGER
 -- Das ist das wichtigste für die Registrierung!
 -- =====================================================
