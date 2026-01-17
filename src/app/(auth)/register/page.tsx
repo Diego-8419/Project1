@@ -93,6 +93,17 @@ export default function RegisterPage() {
       if (error) throw error
 
       if (data.user) {
+        // Erstelle user_profiles Eintrag falls Trigger nicht existiert
+        try {
+          await (supabase as any).from('user_profiles').upsert({
+            id: data.user.id,
+            email: email,
+            full_name: fullName || email,
+          }, { onConflict: 'id' })
+        } catch (profileErr) {
+          console.log('Profile creation handled by trigger or already exists')
+        }
+
         setSuccess(true)
         // Redirect to login after 2 seconds
         setTimeout(() => {
