@@ -21,7 +21,7 @@ export const FEATURES = {
    * false: Nur bestehende Admins können Firmen erstellen
    * true: Jeder Benutzer kann seine eigene Firma erstellen
    */
-  ALLOW_USER_CREATE_COMPANY: false,
+  ALLOW_USER_CREATE_COMPANY: true,
 } as const
 
 export type FeatureFlags = typeof FEATURES
