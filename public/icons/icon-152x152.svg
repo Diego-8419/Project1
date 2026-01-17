@@ -1,0 +1,25 @@
+
+<svg width="152" height="152" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#14B8A6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0D9488;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Hintergrund -->
+  <rect width="152" height="152" fill="url(#grad)" rx="30.400000000000002"/>
+
+  <!-- Checkmark Icon -->
+  <g transform="translate(38, 38)">
+    <path d="M 22.8 38 L 34.96 53.199999999999996 L 60.800000000000004 22.8"
+          stroke="white"
+          stroke-width="9.12"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"/>
+    <circle cx="38" cy="38" r="30.400000000000002"
+            stroke="white"
+            stroke-width="6.08"
+            fill="none"/>
+  </g>
+</svg>
