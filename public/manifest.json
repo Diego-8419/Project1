@@ -1,11 +1,11 @@
 {
-  "name": "ToDo App - Multi-Mandanten Aufgabenverwaltung",
-  "short_name": "ToDo App",
+  "name": "JustToDo - Aufgabenverwaltung",
+  "short_name": "JustToDo",
   "description": "Professionelle Multi-Mandanten ToDo-Verwaltung mit Kollaboration",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0C1E3A",
-  "theme_color": "#14B8A6",
+  "background_color": "#1f2937",
+  "theme_color": "#2563eb",
   "orientation": "portrait-primary",
   "icons": [
     {
