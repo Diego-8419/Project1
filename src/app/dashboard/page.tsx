@@ -114,7 +114,7 @@ export default function CompanySelectorPage() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Lade Firmen...</p>
         </div>
       </div>
@@ -127,8 +127,10 @@ export default function CompanySelectorPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow">
-              <span className="text-white font-bold text-lg">JT</span>
+            <div className="w-10 h-10 bg-teal-500 rounded-lg flex items-center justify-center shadow">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
             </div>
             <div>
               <h1 className="text-xl text-gray-900 dark:text-white">
@@ -158,7 +160,7 @@ export default function CompanySelectorPage() {
             {companies.map((company) => (
               <div
                 key={company.id}
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition p-6 border-2 border-transparent hover:border-blue-500 relative group"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition p-6 border-2 border-transparent hover:border-teal-500 relative group"
               >
                 {/* Löschen-Button für Admins */}
                 {company.role === 'admin' && (
@@ -227,7 +229,7 @@ export default function CompanySelectorPage() {
           !showCreateForm ? (
             <button
               onClick={() => setShowCreateForm(true)}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-4 px-6 rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2"
+              className="w-full bg-teal-500 hover:bg-teal-600 text-white font-medium py-4 px-6 rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2"
             >
               <span className="text-2xl">+</span>
               <span>Neue Firma erstellen</span>
@@ -252,14 +254,14 @@ export default function CompanySelectorPage() {
                   value={newCompanyName}
                   onChange={(e) => setNewCompanyName(e.target.value)}
                   placeholder="z.B. Meine Firma GmbH"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
               <div className="flex gap-3">
                 <button
                   type="submit"
                   disabled={creating || !newCompanyName.trim()}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-teal-500 hover:bg-teal-600 text-white font-medium py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {creating ? 'Wird erstellt...' : 'Erstellen'}
                 </button>

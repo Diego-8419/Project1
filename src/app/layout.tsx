@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "JustToDo - Aufgabenverwaltung",
   description: "Professionelle Multi-Mandanten ToDo-Verwaltung mit Kollaboration",
   manifest: "/manifest.json",
-  themeColor: "#2563eb",
+  themeColor: "#14b8a6",
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },

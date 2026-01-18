@@ -83,8 +83,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           {/* Logo/Header */}
           <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
             <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">JT</span>
+              <div className="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
               </div>
               <span className="text-lg text-gray-900 dark:text-white">
                 <em className="font-light italic">Just</em> <span className="font-bold">To Do</span>
@@ -112,7 +114,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   onClick={onClose}
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg transition ${
                     active
-                      ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                      ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-400'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -125,6 +127,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
           {/* Footer */}
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex justify-center gap-3 mb-2 text-xs">
+              <Link href="/datenschutz" className="text-gray-500 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 transition">
+                Datenschutz
+              </Link>
+              <span className="text-gray-400">•</span>
+              <Link href="/impressum" className="text-gray-500 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 transition">
+                Impressum
+              </Link>
+            </div>
             <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
               © 2026 <em className="italic">Just</em> To Do
             </div>
