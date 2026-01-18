@@ -331,6 +331,170 @@ export async function addCompanyMemberByEmail(
 }
 
 /**
+ * Einladungs-Typ für pending invitations
+ */
+export type PendingInvitation = {
+  id: string
+  company_id: string
+  email: string
+  name: string
+  role: 'admin' | 'gl' | 'superuser' | 'user'
+  token: string
+  invited_by: string
+  created_at: string
+  expires_at: string
+}
+
+/**
+ * Lädt einen neuen Benutzer per E-Mail ein (auch wenn er noch nicht existiert)
+ * Erstellt eine Einladung die per Link angenommen werden kann
+ */
+export async function inviteNewMember(
+  supabase: SupabaseClient<Database>,
+  data: {
+    companyId: string
+    email: string
+    name: string
+    role: 'admin' | 'gl' | 'superuser' | 'user'
+    invitedBy: string
+  }
+): Promise<{ inviteToken: string }> {
+  // Prüfe ob User bereits existiert
+  const { data: existingUser } = await (supabase as any)
+    .from('user_profiles')
+    .select('id')
+    .eq('email', data.email)
+    .single()
+
+  if (existingUser) {
+    // User existiert - direkt hinzufügen
+    const { error } = await (supabase as any)
+      .from('company_members')
+      .insert({
+        company_id: data.companyId,
+        user_id: existingUser.id,
+        role: data.role,
+      })
+
+    if (error) {
+      if (error.code === '23505') {
+        throw new Error('Benutzer ist bereits Mitglied dieser Firma')
+      }
+      throw error
+    }
+
+    return { inviteToken: '' } // Kein Token nötig, direkt hinzugefügt
+  }
+
+  // User existiert nicht - Einladung erstellen
+  const token = crypto.randomUUID()
+  const expiresAt = new Date()
+  expiresAt.setDate(expiresAt.getDate() + 7) // 7 Tage gültig
+
+  const { error } = await (supabase as any)
+    .from('pending_invitations')
+    .insert({
+      company_id: data.companyId,
+      email: data.email,
+      name: data.name,
+      role: data.role,
+      token: token,
+      invited_by: data.invitedBy,
+      expires_at: expiresAt.toISOString(),
+    })
+
+  if (error) {
+    if (error.code === '23505') {
+      throw new Error('Eine Einladung für diese E-Mail existiert bereits')
+    }
+    throw error
+  }
+
+  return { inviteToken: token }
+}
+
+/**
+ * Holt alle ausstehenden Einladungen für eine Firma
+ */
+export async function getPendingInvitations(
+  supabase: SupabaseClient<Database>,
+  companyId: string
+): Promise<PendingInvitation[]> {
+  const { data, error } = await supabase
+    .from('pending_invitations')
+    .select('*')
+    .eq('company_id', companyId)
+    .gt('expires_at', new Date().toISOString())
+
+  if (error) throw error
+  return data || []
+}
+
+/**
+ * Löscht eine ausstehende Einladung
+ */
+export async function cancelInvitation(
+  supabase: SupabaseClient<Database>,
+  invitationId: string
+): Promise<void> {
+  const { error } = await supabase
+    .from('pending_invitations')
+    .delete()
+    .eq('id', invitationId)
+
+  if (error) throw error
+}
+
+/**
+ * Akzeptiert eine Einladung (nach Registrierung)
+ */
+export async function acceptInvitation(
+  supabase: SupabaseClient<Database>,
+  token: string,
+  userId: string
+): Promise<{ companyId: string; companySlug: string }> {
+  // Hole Einladung
+  const { data: invitation, error: inviteError } = await (supabase as any)
+    .from('pending_invitations')
+    .select('*, companies(slug)')
+    .eq('token', token)
+    .gt('expires_at', new Date().toISOString())
+    .single()
+
+  if (inviteError || !invitation) {
+    throw new Error('Einladung nicht gefunden oder abgelaufen')
+  }
+
+  // Füge User zur Firma hinzu
+  const { error: memberError } = await (supabase as any)
+    .from('company_members')
+    .insert({
+      company_id: invitation.company_id,
+      user_id: userId,
+      role: invitation.role,
+    })
+
+  if (memberError) {
+    if (memberError.code === '23505') {
+      // User ist bereits Mitglied - Einladung löschen und weitermachen
+    } else {
+      throw memberError
+    }
+  }
+
+  // Lösche Einladung
+  await (supabase as any)
+    .from('pending_invitations')
+    .delete()
+    .eq('id', invitation.id)
+
+  return {
+    companyId: invitation.company_id,
+    companySlug: invitation.companies?.slug || ''
+  }
+}
+
+/**
  * Aktualisiert die Rolle eines Mitglieds
  */
 export async function updateMemberRole(

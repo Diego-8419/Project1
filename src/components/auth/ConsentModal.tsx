@@ -11,9 +11,11 @@ import Link from 'next/link'
 interface ConsentModalProps {
   onAccept: () => void
   onDecline: () => void
+  title?: string
+  message?: string
 }
 
-export default function ConsentModal({ onAccept, onDecline }: ConsentModalProps) {
+export default function ConsentModal({ onAccept, onDecline, title, message }: ConsentModalProps) {
   const [acceptedDataPrivacy, setAcceptedDataPrivacy] = useState(false)
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [acceptedAge, setAcceptedAge] = useState(false)
@@ -45,10 +47,10 @@ export default function ConsentModal({ onAccept, onDecline }: ConsentModalProps)
           {/* Header */}
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Willkommen!
+              {title || 'Willkommen!'}
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Bevor Sie sich registrieren, benötigen wir Ihre Zustimmung zu folgenden Punkten:
+              {message || 'Bevor Sie sich registrieren, benötigen wir Ihre Zustimmung zu folgenden Punkten:'}
             </p>
           </div>
 
@@ -62,7 +64,7 @@ export default function ConsentModal({ onAccept, onDecline }: ConsentModalProps)
                   id="consent-privacy"
                   checked={acceptedDataPrivacy}
                   onChange={(e) => setAcceptedDataPrivacy(e.target.checked)}
-                  className="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="mt-1 w-5 h-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
                 />
                 <div className="flex-1">
                   <label htmlFor="consent-privacy" className="font-semibold text-gray-900 dark:text-white block mb-2 cursor-pointer">
@@ -70,7 +72,7 @@ export default function ConsentModal({ onAccept, onDecline }: ConsentModalProps)
                   </label>
                   <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
                     Ich habe die{' '}
-                    <Link href="/datenschutz" target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                    <Link href="/datenschutz" target="_blank" className="text-teal-600 dark:text-teal-400 hover:underline font-medium">
                       Datenschutzerklärung
                     </Link>
                     {' '}zur Kenntnis genommen und stimme der Verarbeitung meiner personenbezogenen Daten gemäß DSGVO zu.
@@ -96,7 +98,7 @@ export default function ConsentModal({ onAccept, onDecline }: ConsentModalProps)
                   id="consent-terms"
                   checked={acceptedTerms}
                   onChange={(e) => setAcceptedTerms(e.target.checked)}
-                  className="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="mt-1 w-5 h-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
                 />
                 <div className="flex-1">
                   <label htmlFor="consent-terms" className="font-semibold text-gray-900 dark:text-white block mb-2 cursor-pointer">
@@ -126,7 +128,7 @@ export default function ConsentModal({ onAccept, onDecline }: ConsentModalProps)
                   id="consent-age"
                   checked={acceptedAge}
                   onChange={(e) => setAcceptedAge(e.target.checked)}
-                  className="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="mt-1 w-5 h-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
                 />
                 <div className="flex-1">
                   <label htmlFor="consent-age" className="font-semibold text-gray-900 dark:text-white block mb-2 cursor-pointer">
@@ -140,19 +142,19 @@ export default function ConsentModal({ onAccept, onDecline }: ConsentModalProps)
             </div>
 
             {/* Zusätzliche Informationen */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div className="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg p-4">
               <div className="flex items-start gap-3">
-                <svg className="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-teal-600 dark:text-teal-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div>
-                  <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-2">
+                  <h3 className="font-semibold text-teal-900 dark:text-teal-200 mb-2">
                     Ihre Rechte
                   </h3>
-                  <p className="text-sm text-blue-800 dark:text-blue-300 mb-2">
+                  <p className="text-sm text-teal-800 dark:text-teal-300 mb-2">
                     Sie haben jederzeit das Recht auf:
                   </p>
-                  <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                  <ul className="text-sm text-teal-800 dark:text-teal-300 space-y-1 list-disc list-inside">
                     <li>Auskunft über Ihre gespeicherten Daten</li>
                     <li>Berichtigung unrichtiger Daten</li>
                     <li>Löschung Ihrer Daten (Ihr Konto kann jederzeit gelöscht werden)</li>
@@ -166,13 +168,13 @@ export default function ConsentModal({ onAccept, onDecline }: ConsentModalProps)
 
             {/* Links */}
             <div className="flex flex-wrap gap-4 text-sm">
-              <Link href="/datenschutz" target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+              <Link href="/datenschutz" target="_blank" className="text-teal-600 dark:text-teal-400 hover:underline flex items-center gap-1">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 Datenschutzerklärung lesen
               </Link>
-              <Link href="/impressum" target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+              <Link href="/impressum" target="_blank" className="text-teal-600 dark:text-teal-400 hover:underline flex items-center gap-1">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -187,7 +189,7 @@ export default function ConsentModal({ onAccept, onDecline }: ConsentModalProps)
               <button
                 onClick={handleAccept}
                 disabled={!canProceed}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 bg-teal-500 hover:bg-teal-600 text-white font-medium py-3 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {canProceed ? 'Zustimmen und fortfahren' : 'Bitte alle Punkte akzeptieren'}
               </button>
