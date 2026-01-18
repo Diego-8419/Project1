@@ -125,10 +125,18 @@ export default function CompanySelectorPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Firma auswählen
-          </h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow">
+              <span className="text-white font-bold text-lg">JT</span>
+            </div>
+            <div>
+              <h1 className="text-xl text-gray-900 dark:text-white">
+                <em className="font-light italic">Just</em> <span className="font-bold">To Do</span>
+              </h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Firma auswählen</p>
+            </div>
+          </div>
           <button
             onClick={handleSignOut}
             className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition"

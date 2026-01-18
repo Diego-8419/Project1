@@ -138,19 +138,21 @@ export default function TodoItem({ todo, onTodoUpdated, onTodoDeleted, companySl
   const totalSubtasks = todo.subtasks.length
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <Link
-              href={`/${companySlug}/todos/${todo.id}`}
-              className="text-lg font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition"
-            >
-              {todo.title}
-            </Link>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
+        <div className="flex-1 min-w-0">
+          {/* Title Row */}
+          <Link
+            href={`/${companySlug}/todos/${todo.id}`}
+            className="block text-base sm:text-lg font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition truncate mb-2"
+          >
+            {todo.title}
+          </Link>
 
+          {/* Badges Row - Mobile optimized */}
+          <div className="flex flex-wrap items-center gap-2 mb-2">
             {/* Priority Badge */}
-            <span className={`flex items-center gap-1 text-sm font-medium ${priorityColors[todo.priority]}`}>
+            <span className={`inline-flex items-center gap-1 text-xs sm:text-sm font-medium ${priorityColors[todo.priority]}`}>
               {todo.priority === 'urgent' && '🔥'}
               {todo.priority === 'high' && '⚠️'}
               {priorityLabels[todo.priority]}
@@ -158,7 +160,7 @@ export default function TodoItem({ todo, onTodoUpdated, onTodoDeleted, companySl
 
             {/* Archiv Badge */}
             {todo.archived && (
-              <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-full flex items-center gap-1">
+              <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-full inline-flex items-center gap-1">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                 </svg>
@@ -174,20 +176,20 @@ export default function TodoItem({ todo, onTodoUpdated, onTodoDeleted, companySl
             </p>
           )}
 
-          {/* Meta Info */}
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+          {/* Meta Info - Mobile optimized grid */}
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
             {/* Status Button - Opens Modal */}
             <button
               onClick={() => canChangeStatusPermission && setShowStatusModal(true)}
               disabled={updating || !canChangeStatusPermission}
-              className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 transition ${
+              className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1 transition ${
                 canChangeStatusPermission && !updating ? 'hover:opacity-80 cursor-pointer' : 'opacity-50 cursor-not-allowed'
               } ${statusColors[todo.status]}`}
               title={!canChangeStatusPermission ? 'Keine Berechtigung zum Ändern des Status' : 'Status ändern'}
             >
               {statusLabels[todo.status]}
               {canChangeStatusPermission && (
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3 hidden sm:inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
               )}
@@ -195,37 +197,39 @@ export default function TodoItem({ todo, onTodoUpdated, onTodoDeleted, companySl
 
             {/* Due Date */}
             {todo.deadline && (
-              <span className="flex items-center gap-1">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span className="inline-flex items-center gap-1">
+                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                {formatDate(todo.deadline)}
+                <span className="whitespace-nowrap">{formatDate(todo.deadline)}</span>
               </span>
             )}
 
             {/* Subtasks Progress */}
             {totalSubtasks > 0 && (
-              <span className="flex items-center gap-1">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span className="inline-flex items-center gap-1">
+                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
-                {completedSubtasks}/{totalSubtasks} Subtasks
+                {completedSubtasks}/{totalSubtasks}
               </span>
             )}
+          </div>
 
-            {/* Created By */}
-            <span className="flex items-center gap-1">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {/* Created By - Separate row on mobile */}
+          <div className="mt-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+            <span className="inline-flex items-center gap-1">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              {todo.created_by_user.full_name || todo.created_by_user.email}
+              <span className="truncate max-w-[150px] sm:max-w-none">{todo.created_by_user.full_name || todo.created_by_user.email}</span>
             </span>
           </div>
 
           {/* Assignees */}
           {todo.assignees.length > 0 && (
-            <div className="mt-3 flex items-center gap-2">
-              <span className="text-sm text-gray-500 dark:text-gray-400">Zugewiesen an:</span>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Zugewiesen:</span>
               <div className="flex -space-x-2">
                 {todo.assignees.slice(0, 3).map((assignee) => {
                   const name = assignee.full_name || assignee.user_email
@@ -233,7 +237,7 @@ export default function TodoItem({ todo, onTodoUpdated, onTodoDeleted, companySl
                   return (
                     <div
                       key={assignee.user_id}
-                      className="w-8 h-8 rounded-full bg-blue-600 border-2 border-white dark:border-gray-800 flex items-center justify-center text-white text-xs font-medium"
+                      className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-blue-600 border-2 border-white dark:border-gray-800 flex items-center justify-center text-white text-[10px] sm:text-xs font-medium"
                       title={name}
                     >
                       {initials}
@@ -241,7 +245,7 @@ export default function TodoItem({ todo, onTodoUpdated, onTodoDeleted, companySl
                   )
                 })}
                 {todo.assignees.length > 3 && (
-                  <div className="w-8 h-8 rounded-full bg-gray-400 border-2 border-white dark:border-gray-800 flex items-center justify-center text-white text-xs font-medium">
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-400 border-2 border-white dark:border-gray-800 flex items-center justify-center text-white text-[10px] sm:text-xs font-medium">
                     +{todo.assignees.length - 3}
                   </div>
                 )}
@@ -250,8 +254,8 @@ export default function TodoItem({ todo, onTodoUpdated, onTodoDeleted, companySl
           )}
         </div>
 
-        {/* Actions */}
-        <div className="flex gap-2">
+        {/* Actions - Compact on mobile */}
+        <div className="flex gap-1 sm:gap-2 shrink-0">
           {/* Archive Button (Admin or Creator) */}
           {(currentCompany?.role === 'admin' || user?.id === todo.created_by) && (
             <button

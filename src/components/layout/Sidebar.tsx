@@ -84,22 +84,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
             <Link href="/dashboard" className="flex items-center gap-2">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-5 h-5 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                  />
-                </svg>
+                <span className="text-white font-bold text-sm">JT</span>
               </div>
-              <span className="text-lg font-bold text-gray-900 dark:text-white">
-                ToDo App
+              <span className="text-lg text-gray-900 dark:text-white">
+                <em className="font-light italic">Just</em> <span className="font-bold">To Do</span>
               </span>
             </Link>
             {/* Close button for mobile */}
@@ -138,7 +126,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           {/* Footer */}
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">
             <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
-              © 2026 ToDo App
+              © 2026 <em className="italic">Just</em> To Do
             </div>
           </div>
         </div>

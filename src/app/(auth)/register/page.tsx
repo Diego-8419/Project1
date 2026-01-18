@@ -33,8 +33,16 @@ export default function RegisterPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 px-4">
         <div className="max-w-md w-full space-y-8 bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl">
           <div className="text-center">
-            <div className="text-6xl mb-4">🔒</div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-2xl">JT</span>
+              </div>
+            </div>
+            <h1 className="text-2xl text-gray-900 dark:text-white mb-4">
+              <em className="font-light italic">Just</em> <span className="font-bold">To Do</span>
+            </h1>
+            <div className="text-4xl mb-4">🔒</div>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
               Registrierung deaktiviert
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
@@ -131,9 +139,17 @@ export default function RegisterPage() {
 
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 px-4">
         <div className="max-w-md w-full space-y-8 bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl">
-        {/* Header */}
+        {/* Header with Logo */}
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <div className="flex justify-center mb-4">
+            <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-2xl">JT</span>
+            </div>
+          </div>
+          <h1 className="text-2xl text-gray-900 dark:text-white">
+            <em className="font-light italic">Just</em> <span className="font-bold">To Do</span>
+          </h1>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mt-4">
             Registrieren
           </h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
