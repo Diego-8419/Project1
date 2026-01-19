@@ -19,6 +19,8 @@ import ActivityTimeline from '@/components/todos/ActivityTimeline'
 import SubtaskModal from '@/components/todos/SubtaskModal'
 import UserPicker from '@/components/shared/UserPicker'
 import DocumentPicker from '@/components/documents/DocumentPicker'
+import DocumentUpload from '@/components/documents/DocumentUpload'
+import { uploadDocument } from '@/lib/db/documents'
 
 export default function TodoDetailPage() {
   const router = useRouter()
@@ -62,6 +64,7 @@ export default function TodoDetailPage() {
   const [documents, setDocuments] = useState<DocumentWithUploader[]>([])
   const [loadingDocuments, setLoadingDocuments] = useState(false)
   const [showDocumentPicker, setShowDocumentPicker] = useState(false)
+  const [showDocumentUpload, setShowDocumentUpload] = useState(false)
 
   useEffect(() => {
     loadTodo()
@@ -354,6 +357,29 @@ export default function TodoDetailPage() {
       alert('Fehler beim Entfernen der Verknüpfung')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleUploadDocument = async (file: File, description: string) => {
+    if (!todo || !currentCompany || !user) return
+
+    try {
+      // 1. Lade Dokument hoch (in die Dokumente-Bibliothek der Firma)
+      const document = await uploadDocument(supabase, {
+        companyId: currentCompany.id,
+        userId: user.id,
+        file,
+        description,
+      })
+
+      // 2. Verknüpfe mit dem ToDo
+      await linkDocumentToTodo(supabase, todo.id, document.id)
+
+      // 3. Lade Dokumente neu
+      await loadDocuments()
+    } catch (err: any) {
+      console.error('Error uploading document:', err)
+      throw new Error(err.message || 'Fehler beim Hochladen des Dokuments')
     }
   }
 
@@ -770,15 +796,26 @@ export default function TodoDetailPage() {
                 Verknüpfte Dokumente ({documents.length})
               </h3>
               {canEdit && (
-                <button
-                  onClick={() => setShowDocumentPicker(true)}
-                  className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  Dokument verknüpfen
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setShowDocumentUpload(true)}
+                    className="text-sm text-teal-600 hover:text-teal-700 dark:text-teal-400 flex items-center gap-1"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    Hochladen
+                  </button>
+                  <button
+                    onClick={() => setShowDocumentPicker(true)}
+                    className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                    Verknüpfen
+                  </button>
+                </div>
               )}
             </div>
 
@@ -983,6 +1020,13 @@ export default function TodoDetailPage() {
             onClose={() => setShowDocumentPicker(false)}
             onSelect={handleLinkDocument}
             excludeIds={documents.map(d => d.id)}
+          />
+        )}
+
+        {showDocumentUpload && (
+          <DocumentUpload
+            onClose={() => setShowDocumentUpload(false)}
+            onUpload={handleUploadDocument}
           />
         )}
       </div>
