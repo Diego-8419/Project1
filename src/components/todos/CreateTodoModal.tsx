@@ -2,14 +2,16 @@
 
 /**
  * CreateTodoModal Component
- * Modal zum Erstellen neuer ToDos mit Zuweisungen
+ * Modal zum Erstellen neuer ToDos mit Zuweisungen und Dokumenten
  */
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { createTodo } from '@/lib/db/todos'
 import { getCompanyMembers, type CompanyMember } from '@/lib/db/companies'
+import { getCompanyDocuments, linkDocumentToTodo, type DocumentWithUploader } from '@/lib/db/documents'
 import { useAuthStore } from '@/lib/stores/authStore'
+import DocumentPicker from '@/components/documents/DocumentPicker'
 
 interface CreateTodoModalProps {
   companyId: string
@@ -30,8 +32,14 @@ export default function CreateTodoModal({ companyId, onClose, onTodoCreated }: C
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Document states
+  const [selectedDocuments, setSelectedDocuments] = useState<DocumentWithUploader[]>([])
+  const [allDocuments, setAllDocuments] = useState<DocumentWithUploader[]>([])
+  const [showDocumentPicker, setShowDocumentPicker] = useState(false)
+
   useEffect(() => {
     loadMembers()
+    loadDocuments()
   }, [])
 
   const loadMembers = async () => {
@@ -44,6 +52,32 @@ export default function CreateTodoModal({ companyId, onClose, onTodoCreated }: C
     }
   }
 
+  const loadDocuments = async () => {
+    try {
+      const documents = await getCompanyDocuments(supabase, companyId)
+      setAllDocuments(documents)
+    } catch (error) {
+      console.error('Error loading documents:', error)
+    }
+  }
+
+  const handleAddDocument = (documentId: string) => {
+    const doc = allDocuments.find(d => d.id === documentId)
+    if (doc && !selectedDocuments.find(d => d.id === documentId)) {
+      setSelectedDocuments(prev => [...prev, doc])
+    }
+  }
+
+  const handleRemoveDocument = (documentId: string) => {
+    setSelectedDocuments(prev => prev.filter(d => d.id !== documentId))
+  }
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + ' B'
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user) return
@@ -52,7 +86,7 @@ export default function CreateTodoModal({ companyId, onClose, onTodoCreated }: C
     setError(null)
 
     try {
-      await createTodo(supabase, {
+      const todo = await createTodo(supabase, {
         companyId,
         userId: user.id,
         title,
@@ -61,6 +95,18 @@ export default function CreateTodoModal({ companyId, onClose, onTodoCreated }: C
         deadline: dueDate || undefined,
         assigneeIds: selectedAssignees.length > 0 ? selectedAssignees : undefined,
       })
+
+      // Verknüpfe ausgewählte Dokumente mit dem ToDo
+      if (selectedDocuments.length > 0) {
+        for (const doc of selectedDocuments) {
+          try {
+            await linkDocumentToTodo(supabase, todo.id, doc.id)
+          } catch (linkError) {
+            console.error('Error linking document:', linkError)
+            // Fehler beim Verknüpfen ignorieren, ToDo wurde bereits erstellt
+          }
+        }
+      }
 
       onTodoCreated()
     } catch (err: any) {
@@ -215,6 +261,75 @@ export default function CreateTodoModal({ companyId, onClose, onTodoCreated }: C
               </p>
             </div>
 
+            {/* Documents */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Dokumente verknüpfen
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowDocumentPicker(true)}
+                  className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Dokument hinzufügen
+                </button>
+              </div>
+
+              {selectedDocuments.length > 0 ? (
+                <div className="space-y-2 border border-gray-300 dark:border-gray-600 rounded-lg p-3">
+                  {selectedDocuments.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <svg className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            {doc.name}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {formatFileSize(doc.file_size)}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveDocument(doc.id)}
+                        className="p-1 text-red-600 hover:text-red-700 dark:text-red-400 flex-shrink-0"
+                        title="Entfernen"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="border border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center">
+                  <svg className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Keine Dokumente ausgewählt
+                  </p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    Klicken Sie auf "Dokument hinzufügen" um Dokumente zu verknüpfen
+                  </p>
+                </div>
+              )}
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                {selectedDocuments.length} Dokument(e) ausgewählt
+              </p>
+            </div>
+
             {/* Actions */}
             <div className="flex gap-3">
               <button
@@ -235,6 +350,18 @@ export default function CreateTodoModal({ companyId, onClose, onTodoCreated }: C
           </form>
         </div>
       </div>
+
+      {/* Document Picker Modal */}
+      {showDocumentPicker && (
+        <DocumentPicker
+          onClose={() => setShowDocumentPicker(false)}
+          onSelect={(documentId) => {
+            handleAddDocument(documentId)
+            setShowDocumentPicker(false)
+          }}
+          excludeIds={selectedDocuments.map(d => d.id)}
+        />
+      )}
     </>
   )
 }
