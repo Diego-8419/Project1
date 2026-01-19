@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react'
 import { useCompanyStore } from '@/lib/stores/companyStore'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { createClient } from '@/lib/supabase/client'
-import { getCompanyMembers, inviteNewMember, getPendingInvitations, cancelInvitation, removeCompanyMember, updateMemberRole, type CompanyMember, type PendingInvitation } from '@/lib/db/companies'
+import { getCompanyMembers, inviteNewMember, getPendingInvitations, cancelInvitation, removeCompanyMember, updateMemberRole, getTotalUsersUnderAdmin, type CompanyMember, type PendingInvitation } from '@/lib/db/companies'
 import { isAdminOrGL } from '@/lib/utils/permissions'
 import SuperuserPermissionsModal from '@/components/settings/SuperuserPermissionsModal'
 
@@ -30,15 +30,28 @@ export default function MembersPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [showSuperuserModal, setShowSuperuserModal] = useState(false)
   const [selectedSuperuser, setSelectedSuperuser] = useState<{ id: string; name: string } | null>(null)
+  const [userLimitInfo, setUserLimitInfo] = useState<{ count: number; limit: number } | null>(null)
 
   const canManageMembers = currentCompany ? isAdminOrGL(currentCompany) : false
 
   useEffect(() => {
-    if (currentCompany) {
+    if (currentCompany && user) {
       loadMembers()
       loadPendingInvitations()
+      loadUserLimitInfo()
     }
-  }, [currentCompany])
+  }, [currentCompany, user])
+
+  const loadUserLimitInfo = async () => {
+    if (!user) return
+
+    try {
+      const info = await getTotalUsersUnderAdmin(supabase, user.id)
+      setUserLimitInfo(info)
+    } catch (error) {
+      console.error('Error loading user limit info:', error)
+    }
+  }
 
   const loadMembers = async () => {
     if (!currentCompany) return
@@ -71,6 +84,7 @@ export default function MembersPage() {
     try {
       await cancelInvitation(supabase, invitationId)
       loadPendingInvitations()
+      loadUserLimitInfo() // Limit aktualisieren
     } catch (error) {
       console.error('Error canceling invitation:', error)
       alert('Fehler beim Zurückziehen der Einladung')
@@ -95,14 +109,16 @@ export default function MembersPage() {
       })
 
       if (result.inviteToken) {
-        // Einladung wurde erstellt - zeige Erfolgsmelosung mit Link
+        // Einladung wurde erstellt - zeige Erfolgsmeldung mit Link
         const inviteUrl = `${window.location.origin}/invite/${result.inviteToken}`
         setSuccessMessage(`Einladung erstellt! Link: ${inviteUrl}`)
         loadPendingInvitations()
+        loadUserLimitInfo() // Limit aktualisieren
       } else {
         // User existierte bereits und wurde direkt hinzugefügt
         setSuccessMessage('Mitglied wurde erfolgreich hinzugefügt!')
         loadMembers()
+        loadUserLimitInfo() // Limit aktualisieren
       }
 
       setShowAddModal(false)
@@ -124,6 +140,7 @@ export default function MembersPage() {
     try {
       await removeCompanyMember(supabase, currentCompany.id, userId)
       loadMembers()
+      loadUserLimitInfo() // Limit aktualisieren
     } catch (err: any) {
       console.error('Error removing member:', err)
       alert('Fehler beim Entfernen des Mitglieds')
@@ -200,15 +217,35 @@ export default function MembersPage() {
             {currentCompany.name} - {members.length} Mitglied(er)
           </p>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Mitglied hinzufügen
-        </button>
+        <div className="flex items-center gap-4">
+          {/* Benutzer-Limit Anzeige */}
+          {userLimitInfo && (
+            <div className={`px-4 py-2 rounded-lg text-sm font-medium ${
+              userLimitInfo.count >= userLimitInfo.limit
+                ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200'
+                : userLimitInfo.count >= userLimitInfo.limit * 0.8
+                ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+            }`}>
+              <span className="flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                {userLimitInfo.count} / {userLimitInfo.limit} Benutzer
+              </span>
+            </div>
+          )}
+          <button
+            onClick={() => setShowAddModal(true)}
+            disabled={userLimitInfo ? userLimitInfo.count >= userLimitInfo.limit : false}
+            className="flex items-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Mitglied hinzufügen
+          </button>
+        </div>
       </div>
 
       {/* Success Message */}

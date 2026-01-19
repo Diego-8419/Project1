@@ -5,6 +5,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/database.types'
+import { LIMITS } from '@/config/features'
 
 export type Company = {
   id: string
@@ -348,6 +349,7 @@ export type PendingInvitation = {
 /**
  * Lädt einen neuen Benutzer per E-Mail ein (auch wenn er noch nicht existiert)
  * Erstellt eine Einladung die per Link angenommen werden kann
+ * Prüft das Benutzer-Limit bevor eine Einladung erstellt wird
  */
 export async function inviteNewMember(
   supabase: SupabaseClient<Database>,
@@ -359,6 +361,15 @@ export async function inviteNewMember(
     invitedBy: string
   }
 ): Promise<{ inviteToken: string }> {
+  // Prüfe das Benutzer-Limit
+  const limitCheck = await canAdminInviteMore(supabase, data.invitedBy)
+  if (!limitCheck.canInvite) {
+    throw new Error(
+      `Benutzer-Limit erreicht. Sie haben bereits ${limitCheck.currentCount} von ${limitCheck.limit} Benutzern. ` +
+      `Bitte entfernen Sie zunächst bestehende Mitglieder oder kontaktieren Sie den Support für eine Erweiterung.`
+    )
+  }
+
   // Prüfe ob User bereits existiert
   const { data: existingUser } = await (supabase as any)
     .from('user_profiles')
@@ -367,6 +378,18 @@ export async function inviteNewMember(
     .single()
 
   if (existingUser) {
+    // Prüfe ob User bereits Mitglied in einer der Admin-Firmen ist
+    const { data: existingMembership } = await (supabase as any)
+      .from('company_members')
+      .select('id')
+      .eq('company_id', data.companyId)
+      .eq('user_id', existingUser.id)
+      .single()
+
+    if (existingMembership) {
+      throw new Error('Benutzer ist bereits Mitglied dieser Firma')
+    }
+
     // User existiert - direkt hinzufügen
     const { error } = await (supabase as any)
       .from('company_members')
@@ -649,4 +672,74 @@ export async function hasSuperuserAccessToCompany(
   if (error) throw error
 
   return !!data
+}
+
+/**
+ * Zählt alle einzigartigen Benutzer unter einem Admin (über alle Firmen hinweg)
+ * Inkludiert: Admin selbst + alle Mitglieder in allen Firmen wo der User Admin ist
+ */
+export async function getTotalUsersUnderAdmin(
+  supabase: SupabaseClient<Database>,
+  adminUserId: string
+): Promise<{ count: number; limit: number }> {
+  // 1. Hole alle Firmen wo der User Admin ist
+  const { data: adminCompanies, error: adminError } = await supabase
+    .from('company_members')
+    .select('company_id')
+    .eq('user_id', adminUserId)
+    .eq('role', 'admin')
+
+  if (adminError) throw adminError
+
+  if (!adminCompanies || adminCompanies.length === 0) {
+    return { count: 1, limit: LIMITS.MAX_USERS_PER_ADMIN } // Nur der Admin selbst
+  }
+
+  const companyIds = adminCompanies.map((c: any) => c.company_id)
+
+  // 2. Hole alle einzigartigen User-IDs aus diesen Firmen
+  const { data: allMembers, error: membersError } = await supabase
+    .from('company_members')
+    .select('user_id')
+    .in('company_id', companyIds)
+
+  if (membersError) throw membersError
+
+  // 3. Hole ausstehende Einladungen für diese Firmen
+  const { data: pendingInvites, error: invitesError } = await (supabase as any)
+    .from('pending_invitations')
+    .select('email')
+    .in('company_id', companyIds)
+    .gt('expires_at', new Date().toISOString())
+
+  if (invitesError) throw invitesError
+
+  // Zähle einzigartige User-IDs
+  const uniqueUserIds = new Set((allMembers || []).map((m: any) => m.user_id))
+
+  // Zähle ausstehende Einladungen (einzigartige E-Mails)
+  const uniqueInviteEmails = new Set((pendingInvites || []).map((i: any) => i.email))
+
+  // Gesamtzahl = aktive Mitglieder + ausstehende Einladungen
+  const totalCount = uniqueUserIds.size + uniqueInviteEmails.size
+
+  return { count: totalCount, limit: LIMITS.MAX_USERS_PER_ADMIN }
+}
+
+/**
+ * Prüft ob ein Admin noch weitere Benutzer einladen kann
+ */
+export async function canAdminInviteMore(
+  supabase: SupabaseClient<Database>,
+  adminUserId: string
+): Promise<{ canInvite: boolean; currentCount: number; limit: number; remaining: number }> {
+  const { count, limit } = await getTotalUsersUnderAdmin(supabase, adminUserId)
+  const remaining = Math.max(0, limit - count)
+
+  return {
+    canInvite: count < limit,
+    currentCount: count,
+    limit,
+    remaining
+  }
 }

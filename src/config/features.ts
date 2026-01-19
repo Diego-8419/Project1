@@ -1,6 +1,6 @@
 /**
- * Feature Flags
- * Hier können Features ein-/ausgeschaltet werden
+ * Feature Flags & Limits
+ * Hier können Features ein-/ausgeschaltet und Limits konfiguriert werden
  */
 
 export const FEATURES = {
@@ -24,4 +24,27 @@ export const FEATURES = {
   ALLOW_USER_CREATE_COMPANY: true,
 } as const
 
+/**
+ * System-Limits
+ */
+export const LIMITS = {
+  /**
+   * Maximale Anzahl an Benutzern pro Admin-Account (über alle Firmen hinweg)
+   * Includes: Admin selbst + alle eingeladenen Mitglieder in allen Firmen
+   */
+  MAX_USERS_PER_ADMIN: 20,
+
+  /**
+   * Maximale Dateigröße für Uploads (in Bytes)
+   * 10 MB = 10 * 1024 * 1024
+   */
+  MAX_FILE_SIZE: 10 * 1024 * 1024,
+
+  /**
+   * Maximale Anzahl an Firmen pro Admin
+   */
+  MAX_COMPANIES_PER_ADMIN: 10,
+} as const
+
 export type FeatureFlags = typeof FEATURES
+export type SystemLimits = typeof LIMITS
