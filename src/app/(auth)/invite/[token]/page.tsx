@@ -49,7 +49,7 @@ export default function InviteAcceptPage() {
       setLoading(true)
 
       // Lade Einladung mit Firmenname
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('pending_invitations')
         .select(`
           id,
@@ -147,7 +147,7 @@ export default function InviteAcceptPage() {
       }
 
       // 2. Erstelle user_profiles Eintrag
-      const { error: profileError } = await supabase
+      const { error: profileError } = await (supabase as any)
         .from('user_profiles')
         .upsert({
           id: authData.user.id,
@@ -160,7 +160,7 @@ export default function InviteAcceptPage() {
       }
 
       // 3. Füge Benutzer zur Firma hinzu
-      const { error: memberError } = await supabase
+      const { error: memberError } = await (supabase as any)
         .from('company_members')
         .insert({
           company_id: invitation.company_id,

@@ -54,7 +54,7 @@ export default function LabelsSettingsPage() {
     try {
       setLoading(true)
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('companies')
         .select('custom_labels')
         .eq('id', currentCompany.id)
@@ -89,7 +89,7 @@ export default function LabelsSettingsPage() {
     setSuccess(false)
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('companies')
         .update({ custom_labels: labels })
         .eq('id', currentCompany.id)
