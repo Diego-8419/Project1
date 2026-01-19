@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react'
 import { useCompanyStore } from '@/lib/stores/companyStore'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { createClient } from '@/lib/supabase/client'
-import { getCompanyMembers, inviteNewMember, getPendingInvitations, cancelInvitation, removeCompanyMember, updateMemberRole, getTotalUsersUnderAdmin, type CompanyMember, type PendingInvitation } from '@/lib/db/companies'
+import { getCompanyMembers, getPendingInvitations, cancelInvitation, removeCompanyMember, updateMemberRole, getTotalUsersUnderAdmin, type CompanyMember, type PendingInvitation } from '@/lib/db/companies'
 import { isAdminOrGL } from '@/lib/utils/permissions'
 import SuperuserPermissionsModal from '@/components/settings/SuperuserPermissionsModal'
 
@@ -100,27 +100,41 @@ export default function MembersPage() {
     setSuccessMessage(null)
 
     try {
-      const result = await inviteNewMember(supabase, {
-        companyId: currentCompany.id,
-        email: newMemberEmail,
-        name: newMemberName,
-        role: newMemberRole,
-        invitedBy: user.id,
+      // Nutze die API-Route für E-Mail-Versand
+      const response = await fetch('/api/invite', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: newMemberEmail,
+          name: newMemberName,
+          role: newMemberRole,
+          companyId: currentCompany.id,
+        }),
       })
 
-      if (result.inviteToken) {
-        // Einladung wurde erstellt - zeige Erfolgsmeldung mit Link
-        const inviteUrl = `${window.location.origin}/invite/${result.inviteToken}`
-        setSuccessMessage(`Einladung erstellt! Link: ${inviteUrl}`)
-        loadPendingInvitations()
-        loadUserLimitInfo() // Limit aktualisieren
-      } else {
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Fehler beim Einladen')
+      }
+
+      if (result.userExists) {
         // User existierte bereits und wurde direkt hinzugefügt
         setSuccessMessage('Mitglied wurde erfolgreich hinzugefügt!')
         loadMembers()
-        loadUserLimitInfo() // Limit aktualisieren
+      } else if (result.emailSent) {
+        // Einladungs-E-Mail wurde versendet
+        setSuccessMessage(`Einladung wurde an ${newMemberEmail} per E-Mail gesendet!`)
+        loadPendingInvitations()
+      } else {
+        // E-Mail konnte nicht gesendet werden, aber Link ist verfügbar
+        setSuccessMessage(result.message)
+        loadPendingInvitations()
       }
 
+      loadUserLimitInfo() // Limit aktualisieren
       setShowAddModal(false)
       setNewMemberEmail('')
       setNewMemberName('')
